@@ -1,8 +1,10 @@
 import React from 'react';
+import { Info } from 'lucide-react';
 
 interface HeaderProps {
   activeModule: number;
   onModuleClick: (module: number) => void;
+  onInfoClick: () => void;
 }
 
 const MODULE_LABELS = [
@@ -12,10 +14,9 @@ const MODULE_LABELS = [
   'Engagement',
   'Content',
   'Methodology',
-  'AI Assessment',
 ];
 
-const Header: React.FC<HeaderProps> = React.memo(({ activeModule, onModuleClick }) => (
+const Header: React.FC<HeaderProps> = React.memo(({ activeModule, onModuleClick, onInfoClick }) => (
   <header className="sticky top-0 z-50 bg-bg-secondary/95 backdrop-blur-md border-b border-border">
     <div className="max-w-dashboard mx-auto px-6 py-4 flex items-center justify-between">
       <div className="flex-shrink-0 flex items-center gap-3">
@@ -32,6 +33,13 @@ const Header: React.FC<HeaderProps> = React.memo(({ activeModule, onModuleClick 
         </div>
       </div>
       <nav className="hidden lg:flex items-center gap-1">
+        <button
+          onClick={onInfoClick}
+          className="px-2 py-1.5 text-text-dim hover:text-gold hover:bg-bg-tertiary/50 rounded-inner transition-colors duration-200 mr-1"
+          title="How this dashboard works"
+        >
+          <Info className="w-4 h-4" />
+        </button>
         {MODULE_LABELS.map((label, i) => (
           <button
             key={i}

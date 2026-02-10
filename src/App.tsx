@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Header from './components/Header';
+import WelcomeOverlay from './components/WelcomeOverlay';
 import StateOfPlay from './components/StateOfPlay';
 import StrategyControls from './components/StrategyControls';
 import FollowerForecast from './components/FollowerForecast';
 import EngagementForecast from './components/EngagementForecast';
 import ContentTracker from './components/ContentTracker';
 import UnderTheHood from './components/UnderTheHood';
-import AIAssessment from './components/AIAssessment';
+
 import { useDashboardState } from './hooks/useDashboardState';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
 
   const mainRef = useRef<HTMLElement>(null);
   const [visibleModule, setVisibleModule] = useState(1);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   const scrollToModule = useCallback((moduleNum: number) => {
     const el = document.getElementById(`module-${moduleNum}`);
@@ -53,7 +55,7 @@ function App() {
       { threshold: 0.3, rootMargin: '-80px 0px 0px 0px' }
     );
 
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 6; i++) {
       const el = document.getElementById(`module-${i}`);
       if (el) observer.observe(el);
     }
@@ -63,7 +65,8 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
-      <Header activeModule={visibleModule} onModuleClick={scrollToModule} />
+      {showWelcome && <WelcomeOverlay onClose={() => setShowWelcome(false)} />}
+      <Header activeModule={visibleModule} onModuleClick={scrollToModule} onInfoClick={() => setShowWelcome(true)} />
 
       <main ref={mainRef} className="max-w-dashboard mx-auto px-6 py-module space-y-module">
         <StateOfPlay />
@@ -98,7 +101,7 @@ function App() {
 
         <UnderTheHood />
 
-        <AIAssessment />
+
       </main>
 
       <footer className="border-t border-border py-6 text-center text-text-dim text-xs">
