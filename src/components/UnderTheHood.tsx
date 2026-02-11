@@ -25,7 +25,11 @@ const CONFIDENCE_COLORS = {
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const UnderTheHood: React.FC = React.memo(() => {
+interface UnderTheHoodProps {
+  compact?: boolean;
+}
+
+const UnderTheHood: React.FC<UnderTheHoodProps> = React.memo(({ compact = false }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   const seasonalChartData = useMemo(() =>
@@ -39,12 +43,14 @@ const UnderTheHood: React.FC = React.memo(() => {
 
   return (
     <section>
-      <SectionHeader
-        moduleNumber={6}
-        title="Under the Hood"
-        subtitle="Full methodology transparency. Every assumption documented with confidence level and source."
-        id="module-6"
-      />
+      {!compact && (
+        <SectionHeader
+          moduleNumber={6}
+          title="Under the Hood"
+          subtitle="Full methodology transparency. Every assumption documented with confidence level and source."
+          id="module-6"
+        />
+      )}
 
       {/* Tab navigation */}
       <div className="flex gap-1 mb-6 border-b border-border pb-0">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   activeModule: number;
@@ -53,6 +54,12 @@ const Header: React.FC<HeaderProps> = React.memo(({ activeModule, onModuleClick,
             {label}
           </button>
         ))}
+        <Link
+          to="/pitch"
+          className="px-3 py-1.5 text-xs text-gold hover:text-gold-light hover:bg-bg-tertiary/50 rounded-inner transition-colors duration-200 ml-1 border border-gold/30"
+        >
+          Pitch Mode
+        </Link>
       </nav>
     </div>
   </header>
