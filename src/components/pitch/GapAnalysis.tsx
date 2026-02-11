@@ -264,22 +264,24 @@ const GapAnalysis: React.FC<GapAnalysisProps> = React.memo(({
           Allocate monthly paid media budget to accelerate follower acquisition across platforms. Based on blended CPF of ${COST_PER_FOLLOWER.toFixed(2)} (IG ~$1.00, TT ~$0.80, X ~$2.00, FB ~$1.50).
         </p>
 
-        <div className="flex items-center gap-4 mb-3">
-          <label className="text-text-secondary text-xs font-mono whitespace-nowrap">
-            Monthly budget
-          </label>
-          <input
-            type="range"
-            min={0}
-            max={BUDGET_STEPS.length - 1}
-            step={1}
-            value={BUDGET_STEPS.indexOf(paidBudget) >= 0 ? BUDGET_STEPS.indexOf(paidBudget) : 0}
-            onChange={e => onPaidBudgetChange(BUDGET_STEPS[Number(e.target.value)])}
-            className="flex-1 accent-success h-1.5"
-          />
-          <span className="text-success text-sm font-mono font-semibold min-w-[80px] text-right">
-            ${formatNumber(paidBudget)}/mo
-          </span>
+        <div className="flex flex-wrap gap-2 mb-3">
+          {BUDGET_STEPS.map(step => {
+            const isActive = paidBudget === step;
+            const label = step === 0 ? '$0' : step < 1000 ? `$${step}` : `$${(step / 1000).toFixed(step % 1000 === 0 ? 0 : 1)}K`;
+            return (
+              <button
+                key={step}
+                onClick={() => onPaidBudgetChange(step)}
+                className={`px-3 py-1.5 rounded-inner text-xs font-mono transition-colors ${
+                  isActive
+                    ? 'bg-success/20 text-success border border-success/40'
+                    : 'bg-bg-tertiary text-text-dim border border-transparent hover:text-text-secondary hover:border-border'
+                }`}
+              >
+                {label}/mo
+              </button>
+            );
+          })}
         </div>
 
         {paidBudget > 0 && (
