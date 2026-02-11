@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import PitchHeader from '../components/pitch/PitchHeader';
 import PitchWelcomeOverlay from '../components/pitch/PitchWelcomeOverlay';
@@ -24,6 +23,7 @@ function PitchView() {
 
   const [showWelcome, setShowWelcome] = useState(true);
   const [showMethodology, setShowMethodology] = useState(false);
+  const [paidBudget, setPaidBudget] = useState(0);
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
@@ -38,6 +38,7 @@ function PitchView() {
         <WhereYouAre />
 
         <StrategyControls
+          compact
           audiencePreset={state.audiencePreset}
           audienceComposition={state.audienceComposition}
           platformConfigs={state.platformConfigs}
@@ -55,20 +56,17 @@ function PitchView() {
         <PitchImpact
           forecast={forecast}
           totalPostsPerMonth={totalPostsPerMonth}
+          platformConfigs={state.platformConfigs}
+          audienceComposition={state.audienceComposition}
+          languageSplit={state.languageSplit}
+          campaigns={state.campaigns}
+          paidBudget={paidBudget}
+          onPaidBudgetChange={setPaidBudget}
         />
       </main>
 
-      {/* Footer with link to full dashboard */}
-      <footer className="border-t border-border py-8 text-center">
-        <Link
-          to="/full"
-          className="inline-block px-6 py-2.5 text-sm text-gold border border-gold/30 rounded-inner hover:bg-gold/10 transition-colors mb-4"
-        >
-          View Full Dashboard
-        </Link>
-        <p className="text-text-dim text-xs">
-          Built by Ralph Innovation &middot; 2026
-        </p>
+      <footer className="border-t border-border py-6 flex items-center justify-center gap-2 text-text-dim text-xs">
+        Built by <img src="/ralph-logo.png" alt="Ralph" className="h-4 w-auto inline-block" /> 2026
       </footer>
 
       {/* Methodology modal overlay */}

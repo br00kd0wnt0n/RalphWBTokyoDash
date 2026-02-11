@@ -1,6 +1,5 @@
 import React from 'react';
 import { Info, FileText } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface PitchHeaderProps {
   onInfoClick: () => void;
@@ -38,12 +37,6 @@ const PitchHeader: React.FC<PitchHeaderProps> = React.memo(({ onInfoClick, onMet
           <FileText className="w-3.5 h-3.5" />
           Methodology
         </button>
-        <Link
-          to="/full"
-          className="px-3 py-1.5 text-xs text-text-dim hover:text-text-secondary hover:bg-bg-tertiary/50 rounded-inner transition-colors duration-200 ml-1"
-        >
-          Full Dashboard
-        </Link>
       </nav>
     </div>
   </header>

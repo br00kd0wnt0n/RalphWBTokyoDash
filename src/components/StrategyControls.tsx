@@ -19,6 +19,7 @@ interface StrategyControlsProps {
   totalPosts: number;
   languageSplit: LanguageSplit;
   campaigns: Campaign[];
+  compact?: boolean;
   onPresetChange: (preset: AudiencePreset) => void;
   onSliderChange: (segment: keyof AudienceComposition, value: number) => void;
   onPlatformUpdate: (platform: Platform, updates: Partial<PlatformConfig>) => void;
@@ -42,6 +43,7 @@ const StrategyControls: React.FC<StrategyControlsProps> = React.memo(({
   totalPosts,
   languageSplit,
   campaigns,
+  compact = false,
   onPresetChange,
   onSliderChange,
   onPlatformUpdate,
@@ -56,7 +58,10 @@ const StrategyControls: React.FC<StrategyControlsProps> = React.memo(({
       <SectionHeader
         moduleNumber={2}
         title="Strategy Controls"
-        subtitle={<>Configure audience, platform allocation, and campaigns. <span className="live-hint">The forecast below updates live.</span> <button onClick={() => document.getElementById('module-3')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="inline-flex items-center gap-1 ml-1 text-gold hover:text-gold-light transition-colors text-xs font-medium">Jump to Forecast <span aria-hidden="true">&darr;</span></button></>}
+        subtitle={compact
+          ? <>Configure audience, platform allocation, and campaigns. <span className="live-hint">The impact section below updates live.</span></>
+          : <>Configure audience, platform allocation, and campaigns. <span className="live-hint">The forecast below updates live.</span> <button onClick={() => document.getElementById('module-3')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="inline-flex items-center gap-1 ml-1 text-gold hover:text-gold-light transition-colors text-xs font-medium">Jump to Forecast <span aria-hidden="true">&darr;</span></button></>
+        }
         id="module-2"
       />
 

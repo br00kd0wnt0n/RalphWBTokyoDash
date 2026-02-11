@@ -18,8 +18,8 @@ const SECTIONS = [
   },
   {
     icon: TrendingUp,
-    label: 'The Impact',
-    description: 'Projected results against the three RFP KPIs: +100K followers, +10% engagement YoY, and 50 strategic posts per month.',
+    label: 'Projected Impact',
+    description: '12-month forecast against the three RFP KPIs: +100K followers, +10% engagement YoY, and 50 strategic posts per month. Updates dynamically as you adjust the strategy.',
   },
 ];
 
