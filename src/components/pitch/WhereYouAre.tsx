@@ -20,7 +20,7 @@ const MILESTONES: { month: string; label: string }[] = [
 ];
 
 const WhereYouAre: React.FC = React.memo(() => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   const timelineData = useMemo(() => {
     const completeMonths = getCompleteMonths();
