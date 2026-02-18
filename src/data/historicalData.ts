@@ -1780,13 +1780,36 @@ export const CURRENT_FOLLOWERS = {
   total: 535_302,
 } as const;
 
-// Average monthly growth (2025 full year)
+// Average monthly growth (2025 full year, net of churn)
 export const AVG_MONTHLY_GROWTH_2025 = {
   ig: 2_800,
   x: 800,
   tt: 330,
   fb: 80,
   total: 4_010,
+} as const;
+
+// Average monthly GROSS follower acquisition (2025 full year)
+// IG values derived from followers_gained column. Others estimated
+// from net growth + estimated churn rate by platform.
+export const AVG_MONTHLY_GROSS_GROWTH_2025 = {
+  ig: 5_800,   // High confidence: derived from followers_gained data
+  x: 1_100,    // Medium confidence: estimated from net + platform churn benchmarks
+  tt: 430,     // Medium confidence: estimated
+  fb: 130,     // Medium confidence: estimated
+  yt: 60,      // Low confidence: estimated
+  total: 7_520,
+} as const;
+
+// Average monthly churn / follower loss (2025 full year)
+// IG values derived from followers_lost column. Others estimated.
+export const AVG_MONTHLY_CHURN_2025 = {
+  ig: 3_000,   // High confidence: derived from followers_lost data
+  x: 300,      // Medium confidence: X churn is lower relative to base
+  tt: 100,     // Medium confidence: TikTok entertainment accounts have low churn
+  fb: 50,      // Medium confidence: estimated
+  yt: 10,      // Low confidence: YouTube subscriber churn is typically low
+  total: 3_460,
 } as const;
 
 // Average monthly posts (2025 full year)

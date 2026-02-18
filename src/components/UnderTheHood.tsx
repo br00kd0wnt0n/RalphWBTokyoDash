@@ -130,7 +130,7 @@ const UnderTheHood: React.FC<UnderTheHoodProps> = React.memo(({ compact = false 
       {activeTab === 1 && (
         <div className="space-y-4">
           <div className="bg-bg-secondary border border-border rounded-card p-6">
-            <h4 className="text-gold text-xs font-mono uppercase tracking-widest mb-4">Base Forecast (Organic Only)</h4>
+            <h4 className="text-gold text-xs font-mono uppercase tracking-widest mb-4">Base Forecast (Current Trajectory)</h4>
             <div className="font-mono text-sm leading-loose">
               <p className="text-gold mb-3">baseGrowth[platform] =</p>
               <div className="pl-6 flex items-center gap-3 flex-wrap">
@@ -148,7 +148,7 @@ const UnderTheHood: React.FC<UnderTheHoodProps> = React.memo(({ compact = false 
           </div>
 
           <div className="bg-bg-secondary border border-border rounded-card p-6">
-            <h4 className="text-gold text-xs font-mono uppercase tracking-widest mb-4">With Strategy</h4>
+            <h4 className="text-gold text-xs font-mono uppercase tracking-widest mb-4">With Ralph Strategy</h4>
             <div className="font-mono text-sm leading-loose">
               <p className="text-gold mb-3">withStrategy[platform] = max( baseGrowth, organicBase x strategyMult x seasonal )</p>
               <div className="pl-6 space-y-3">
@@ -174,7 +174,7 @@ const UnderTheHood: React.FC<UnderTheHoodProps> = React.memo(({ compact = false 
           </div>
 
           <div className="bg-bg-secondary border border-border rounded-card p-6">
-            <h4 className="text-gold text-xs font-mono uppercase tracking-widest mb-4">With Campaigns</h4>
+            <h4 className="text-gold text-xs font-mono uppercase tracking-widest mb-4">With Strategy + Calendar</h4>
             <div className="font-mono text-sm leading-loose">
               <p className="text-gold mb-3">withCampaigns[platform] = max( baseGrowth, organicBase x strategyMult x (seasonal + campLift) )</p>
               <div className="pl-6 space-y-3">
@@ -204,6 +204,14 @@ const UnderTheHood: React.FC<UnderTheHoodProps> = React.memo(({ compact = false 
               <li className="flex gap-2">
                 <span className="text-gold shrink-0">4.</span>
                 <span>Audience multipliers can go <strong className="text-text-primary">below 1.0</strong> (e.g., core fans on TikTok = 0.6x), but the result-level floor ensures the forecast stays realistic.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-gold shrink-0">5.</span>
+                <span><strong className="text-text-primary">Churn is modeled independently</strong> of content strategy. Follower attrition (~3,460/month across platforms) represents account deletions, interest shifts, and platform migration. It applies equally to all scenarios. Organic content must first replace this churn before producing net growth.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-gold shrink-0">6.</span>
+                <span>The forecast shows both <strong className="text-text-primary">gross acquisition and net growth</strong>. Gross acquisition represents the total followers attracted by organic content strategy. Net growth = gross minus natural churn.</span>
               </li>
             </ul>
           </div>

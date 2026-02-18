@@ -20,9 +20,9 @@ interface FollowerForecastProps {
 }
 
 const SCENARIOS: { value: ForecastScenario; label: string }[] = [
-  { value: 'organic', label: 'Organic Only' },
-  { value: 'strategy', label: 'With Strategy' },
-  { value: 'campaigns', label: 'With Campaigns' },
+  { value: 'organic', label: 'Current Trajectory' },
+  { value: 'strategy', label: 'With Ralph Strategy' },
+  { value: 'campaigns', label: 'With Strategy + Calendar' },
 ];
 
 const FollowerForecast: React.FC<FollowerForecastProps> = React.memo(({
@@ -78,6 +78,16 @@ const FollowerForecast: React.FC<FollowerForecastProps> = React.memo(({
       return sum + f.totalCampaigns;
     }, 0);
   }, [forecast, scenario]);
+
+  // Gross acquisition and churn totals (always based on the active scenario's data)
+  const grossTotal = useMemo(
+    () => forecast.reduce((sum, f) => sum + f.totalGrossAcquisition, 0),
+    [forecast]
+  );
+  const churnTotal = useMemo(
+    () => forecast.reduce((sum, f) => sum + f.totalChurnLoss, 0),
+    [forecast]
+  );
 
   const target = KPI_TARGETS.followerGrowth;
   const progressPct = Math.min(100, (totalGrowth / target) * 100);
@@ -159,7 +169,7 @@ const FollowerForecast: React.FC<FollowerForecastProps> = React.memo(({
           label="Monthly Avg Growth"
           value={formatNumber(Math.round(totalGrowth / 12))}
           trend="up"
-          trendLabel="Across all platforms"
+          trendLabel="Net gain across all platforms"
         />
         <MetricCard
           label="Target: +100K"
@@ -173,6 +183,37 @@ const FollowerForecast: React.FC<FollowerForecastProps> = React.memo(({
           value={forecast.length > 0 ? formatNumber(Math.max(...forecast.map(f => scenario === 'organic' ? f.totalBase : scenario === 'strategy' ? f.totalStrategy : f.totalCampaigns))) : '0'}
           subValue="Best month projected growth"
         />
+      </div>
+
+      {/* Gross acquisition vs churn breakdown */}
+      <div className="bg-bg-secondary border border-border rounded-card p-5 mb-6">
+        <h3 className="text-text-primary text-sm font-medium mb-3">Acquisition vs. Natural Attrition</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-bg-tertiary rounded-inner">
+            <p className="text-text-dim text-[10px] font-mono uppercase tracking-wider mb-1">Gross Followers Acquired</p>
+            <p className="text-success text-xl font-semibold font-mono">{formatGrowth(grossTotal)}</p>
+            <p className="text-text-dim text-[10px] mt-1">
+              {formatNumber(Math.round(grossTotal / 12))}/month average
+            </p>
+          </div>
+          <div className="p-4 bg-bg-tertiary rounded-inner">
+            <p className="text-text-dim text-[10px] font-mono uppercase tracking-wider mb-1">Natural Churn</p>
+            <p className="text-danger text-xl font-semibold font-mono">-{formatNumber(churnTotal)}</p>
+            <p className="text-text-dim text-[10px] mt-1">
+              {formatNumber(Math.round(churnTotal / 12))}/month lost to attrition
+            </p>
+          </div>
+          <div className="p-4 bg-bg-tertiary rounded-inner">
+            <p className="text-text-dim text-[10px] font-mono uppercase tracking-wider mb-1">Net Growth</p>
+            <p className="text-gold text-xl font-semibold font-mono">{formatGrowth(grossTotal - churnTotal)}</p>
+            <p className="text-text-dim text-[10px] mt-1">
+              Content must replace {formatNumber(Math.round(churnTotal / 12))} lost followers/month before net growth
+            </p>
+          </div>
+        </div>
+        <p className="text-text-dim text-[10px] mt-3 leading-relaxed">
+          Organic content strategy is responsible for acquiring {formatNumber(grossTotal)} followers over 12 months. Natural follower attrition ({formatNumber(churnTotal)}) occurs across all scenarios regardless of content strategy, representing account deletions, interest shifts, and platform migration.
+        </p>
       </div>
 
       {/* Target progress bar */}

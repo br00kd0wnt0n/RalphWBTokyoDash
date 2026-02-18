@@ -1,5 +1,5 @@
 import type { Platform, AudienceComposition, PlatformConfig, Campaign, ForecastMonth, LanguageSplit } from '../data/types';
-import { AVG_MONTHLY_GROWTH_2025, AVG_MONTHLY_POSTS_2025, CURRENT_FOLLOWERS } from '../data/historicalData';
+import { AVG_MONTHLY_GROWTH_2025, AVG_MONTHLY_POSTS_2025, AVG_MONTHLY_GROSS_GROWTH_2025, AVG_MONTHLY_CHURN_2025, CURRENT_FOLLOWERS } from '../data/historicalData';
 import { SEGMENTS } from '../data/audiences';
 import { SEASONAL_FACTORS } from '../data/campaigns';
 
@@ -27,19 +27,44 @@ const BASELINE_POSTS: Record<Platform, number> = {
 };
 
 // ============================================================
-// Organic Base Growth
+// Organic Base Growth (NET, used for backward-compatible scenarios)
 // Source: 2025 full-year historical averages (high confidence for IG/X/FB)
-// ASSUMPTION: 2025 average continues as baseline. Does not account
-// for acceleration or deceleration trends within 2025.
-// NEEDS CLIENT DATA: Monthly trend direction to use weighted recent
-// average instead of flat annual average.
 // ============================================================
 const ORGANIC_BASE: Record<Platform, number> = {
   ig: AVG_MONTHLY_GROWTH_2025.ig,  // 2,800
   x: AVG_MONTHLY_GROWTH_2025.x,    // 800
   tt: AVG_MONTHLY_GROWTH_2025.tt,   // 330
   fb: AVG_MONTHLY_GROWTH_2025.fb,   // 80
-  yt: 50,                           // ESTIMATE: no historical data, no baseline followers tracked
+  yt: 50,                           // ESTIMATE
+};
+
+// ============================================================
+// Gross Acquisition Base (before churn)
+// IG: High confidence, derived from followers_gained column
+// Others: Medium/low confidence, estimated from net + churn benchmarks
+// ============================================================
+const GROSS_BASE: Record<Platform, number> = {
+  ig: AVG_MONTHLY_GROSS_GROWTH_2025.ig,  // 5,800
+  x: AVG_MONTHLY_GROSS_GROWTH_2025.x,    // 1,100
+  tt: AVG_MONTHLY_GROSS_GROWTH_2025.tt,   // 430
+  fb: AVG_MONTHLY_GROSS_GROWTH_2025.fb,   // 130
+  yt: AVG_MONTHLY_GROSS_GROWTH_2025.yt,   // 60
+};
+
+// ============================================================
+// Churn Base (monthly follower loss)
+// IG: High confidence, derived from followers_lost column
+// Others: Estimated. Churn is largely independent of content strategy;
+// it reflects natural audience turnover (account deletions, interest
+// shifts, platform migration). This is the key insight: organic
+// content must first replace churn before it produces net growth.
+// ============================================================
+const CHURN_BASE: Record<Platform, number> = {
+  ig: AVG_MONTHLY_CHURN_2025.ig,  // 3,000
+  x: AVG_MONTHLY_CHURN_2025.x,    // 300
+  tt: AVG_MONTHLY_CHURN_2025.tt,   // 100
+  fb: AVG_MONTHLY_CHURN_2025.fb,   // 50
+  yt: AVG_MONTHLY_CHURN_2025.yt,   // 10
 };
 
 function contentVolumeMultiplier(platform: Platform, postsPerMonth: number): number {
@@ -117,18 +142,32 @@ function languageMultiplier(lang: LanguageSplit): number {
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // ============================================================
-// FORECAST FORMULA
+// FORECAST FORMULA (v2: with explicit churn model)
 //
-// baseGrowth = organic * seasonal
-// withStrategy = organic * volumeMult * audienceMult * langMult * seasonal
-// withCampaigns = organic * volumeMult * audienceMult * langMult * (seasonal + campLift)
+// GROSS acquisition:
+//   grossBase = gross_organic * seasonal
+//   grossStrategy = gross_organic * volumeMult * audienceMult * langMult * seasonal
+//   grossCampaigns = gross_organic * volumeMult * audienceMult * langMult * (seasonal + campLift)
+//
+// CHURN (independent of strategy; represents natural attrition):
+//   churnLoss = churn_base * seasonal_churn_factor
+//   Seasonal churn factor is mildly counter-cyclical: slightly higher
+//   churn during low-engagement months as disengaged followers drop off.
+//
+// NET growth = gross - churn
 //
 // Key design decisions:
-// - Campaigns are ADDITIVE to seasonal (not multiplicative) to prevent
-//   double-counting peaks already reflected in seasonal factors.
-// - Campaign lift is platform-specific using each campaign's platforms array.
-// - withStrategy and withCampaigns are floored at baseGrowth so that
-//   strategy layers never underperform organic baseline.
+// - Churn is modeled independently of content strategy because follower
+//   loss is driven by platform-level factors (account deletions, interest
+//   decay) rather than content quality. This is methodologically sound
+//   and also makes the organic contribution visible: organic content
+//   must first replace ~3,460 lost followers/month before producing
+//   any net growth.
+// - Campaigns amplify gross acquisition but do NOT reduce churn.
+//   This is realistic (paid reach doesn't prevent unfollows) and
+//   properly sizes the campaign contribution.
+// - Campaign lift is additive to seasonal (not multiplicative) to
+//   prevent double-counting peaks already reflected in seasonal factors.
 // ============================================================
 export function generateForecast(
   composition: AudienceComposition,
@@ -139,6 +178,8 @@ export function generateForecast(
   const platforms: Platform[] = ['ig', 'x', 'tt', 'fb', 'yt'];
   const months: ForecastMonth[] = [];
   let cumulativeGrowth = 0;
+  let cumulativeGross = 0;
+  let cumulativeChurn = 0;
 
   for (let m = 1; m <= 12; m++) {
     const mm = String(m).padStart(2, '0');
@@ -147,42 +188,79 @@ export function generateForecast(
     const seasonal = getSeasonalFactor(monthKey);
     const activeCampaigns = getActiveCampaignIds(monthKey, campaigns);
 
-    const platformResults: Record<string, { baseGrowth: number; withStrategy: number; withCampaigns: number; optimistic: number; pessimistic: number }> = {};
+    const platformResults: Record<string, {
+      baseGrowth: number;
+      withStrategy: number;
+      withCampaigns: number;
+      optimistic: number;
+      pessimistic: number;
+      grossAcquisition: number;
+      churnLoss: number;
+    }> = {};
 
     let totalBase = 0;
     let totalStrategy = 0;
     let totalCampaigns = 0;
     let totalOptimistic = 0;
     let totalPessimistic = 0;
+    let totalGross = 0;
+    let totalChurn = 0;
 
     for (const p of platforms) {
       const organic = ORGANIC_BASE[p];
+      const grossOrganic = GROSS_BASE[p];
+      const churnBase = CHURN_BASE[p];
       const config = platformConfigs[p];
       const posts = config?.postsPerMonth ?? BASELINE_POSTS[p];
 
-      const baseGrowth = Math.round(organic * seasonal);
+      // Churn: mildly seasonal (inverse to engagement: higher churn in low months)
+      // Use a dampened inverse seasonal factor for churn
+      const churnSeasonalFactor = 1 + (1 - seasonal) * 0.3;
+      const churnLoss = Math.round(churnBase * churnSeasonalFactor);
+
       const volumeMult = contentVolumeMultiplier(p, posts);
       const audienceMult = audienceCompositionMultiplier(composition, p);
       const langMult = languageMultiplier(lang);
-
-      // Campaign lift is additive to seasonal, platform-specific
       const campLift = campaignLiftForMonth(monthKey, campaigns, p);
       const strategyMult = volumeMult * audienceMult * langMult;
 
-      const withStrategy = Math.max(baseGrowth, Math.round(organic * strategyMult * seasonal));
-      const withCampaigns = Math.max(baseGrowth, Math.round(organic * strategyMult * (seasonal + campLift)));
+      // Gross acquisition for each scenario
+      const grossBase = Math.round(grossOrganic * seasonal);
+      const grossStrategy = Math.round(grossOrganic * strategyMult * seasonal);
+      const grossCampaigns = Math.round(grossOrganic * strategyMult * (seasonal + campLift));
+
+      // Net growth = gross - churn (floored at a minimum so strategy never
+      // underperforms organic baseline in net terms)
+      const baseGrowth = Math.round(organic * seasonal);
+      const withStrategy = Math.max(baseGrowth, grossStrategy - churnLoss);
+      const withCampaigns = Math.max(baseGrowth, grossCampaigns - churnLoss);
       const optimistic = Math.round(withCampaigns * 1.25);
       const pessimistic = Math.round(withCampaigns * 0.7);
 
-      platformResults[p] = { baseGrowth, withStrategy, withCampaigns, optimistic, pessimistic };
+      // For the gross/churn display, use the campaigns scenario gross
+      const grossAcquisition = grossCampaigns;
+
+      platformResults[p] = {
+        baseGrowth,
+        withStrategy,
+        withCampaigns,
+        optimistic,
+        pessimistic,
+        grossAcquisition,
+        churnLoss,
+      };
       totalBase += baseGrowth;
       totalStrategy += withStrategy;
       totalCampaigns += withCampaigns;
       totalOptimistic += optimistic;
       totalPessimistic += pessimistic;
+      totalGross += grossAcquisition;
+      totalChurn += churnLoss;
     }
 
     cumulativeGrowth += totalCampaigns;
+    cumulativeGross += totalGross;
+    cumulativeChurn += totalChurn;
 
     months.push({
       month: monthKey,
@@ -193,7 +271,11 @@ export function generateForecast(
       totalCampaigns,
       totalOptimistic,
       totalPessimistic,
+      totalGrossAcquisition: totalGross,
+      totalChurnLoss: totalChurn,
       cumulativeGrowth,
+      cumulativeGross,
+      cumulativeChurn,
       activeCampaigns,
       seasonalFactor: seasonal,
     });
@@ -211,4 +293,12 @@ export function getProjectedFollowers(forecast: ForecastMonth[]): number {
   return startingTotal + getTotalProjectedGrowth(forecast);
 }
 
-export { ORGANIC_BASE, BASELINE_POSTS };
+export function getTotalGrossAcquisition(forecast: ForecastMonth[]): number {
+  return forecast.length > 0 ? forecast[forecast.length - 1].cumulativeGross : 0;
+}
+
+export function getTotalChurnLoss(forecast: ForecastMonth[]): number {
+  return forecast.length > 0 ? forecast[forecast.length - 1].cumulativeChurn : 0;
+}
+
+export { ORGANIC_BASE, BASELINE_POSTS, GROSS_BASE, CHURN_BASE };

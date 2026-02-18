@@ -174,7 +174,7 @@ const PitchImpact: React.FC<PitchImpactProps> = React.memo(({ forecast, totalPos
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-0.5 bg-gold rounded" />
-                <span className="text-text-dim text-[10px]">Organic + Campaigns</span>
+                <span className="text-text-dim text-[10px]">Ralph Strategy</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-0.5 bg-success rounded" />
@@ -211,7 +211,7 @@ const PitchImpact: React.FC<PitchImpactProps> = React.memo(({ forecast, totalPos
               contentStyle={{ backgroundColor: '#141428', border: '1px solid #2a2a4a', borderRadius: 8, fontSize: 12 }}
               labelStyle={{ color: '#f5f0e8' }}
               formatter={(value: number, name: string) => {
-                const label = name === 'withPaid' ? 'With Paid Media' : 'Organic + Campaigns';
+                const label = name === 'withPaid' ? 'With Paid Media' : 'Ralph Strategy';
                 return [formatNumber(value), label];
               }}
             />

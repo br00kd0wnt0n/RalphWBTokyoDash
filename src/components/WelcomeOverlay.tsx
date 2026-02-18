@@ -19,7 +19,7 @@ const MODULES = [
   {
     icon: TrendingUp,
     label: 'Follower Forecast',
-    description: '12-month growth projection with confidence bands. Toggle between organic, strategy, and campaign scenarios.',
+    description: '12-month growth projection with confidence bands. Toggle between current trajectory, Ralph strategy, and strategy + calendar scenarios. Shows gross acquisition vs. natural churn.',
   },
   {
     icon: Layers,

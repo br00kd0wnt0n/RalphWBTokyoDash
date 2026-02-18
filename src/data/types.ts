@@ -131,13 +131,19 @@ export interface ForecastMonth {
     withCampaigns: number;
     optimistic: number;
     pessimistic: number;
+    grossAcquisition: number;  // Total followers acquired before churn
+    churnLoss: number;         // Followers lost to natural attrition
   }>;
   totalBase: number;
   totalStrategy: number;
   totalCampaigns: number;
   totalOptimistic: number;
   totalPessimistic: number;
+  totalGrossAcquisition: number;  // Sum of gross across platforms
+  totalChurnLoss: number;         // Sum of churn across platforms
   cumulativeGrowth: number;
+  cumulativeGross: number;        // Cumulative gross acquisition
+  cumulativeChurn: number;        // Cumulative churn loss
   activeCampaigns: string[];
   seasonalFactor: number;
 }
