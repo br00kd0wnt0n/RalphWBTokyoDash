@@ -35,6 +35,16 @@ const PitchImpact: React.FC<PitchImpactProps> = React.memo(({ forecast, totalPos
   const paidFollowersTotal = paidFollowersPerMonth * 12;
   const totalGrowth = organicGrowth + paidFollowersTotal;
 
+  // Gross acquisition and churn totals
+  const grossTotal = useMemo(
+    () => forecast.reduce((sum, f) => sum + f.totalGrossAcquisition, 0),
+    [forecast]
+  );
+  const churnTotal = useMemo(
+    () => forecast.reduce((sum, f) => sum + f.totalChurnLoss, 0),
+    [forecast]
+  );
+
   const followerTarget = KPI_TARGETS.followerGrowth;
   const followerPct = Math.min(100, (totalGrowth / followerTarget) * 100);
 
@@ -165,6 +175,37 @@ const PitchImpact: React.FC<PitchImpactProps> = React.memo(({ forecast, totalPos
         <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold gold-pulse" />
         KPI projections update live as you adjust strategy controls
       </p>
+
+      {/* Gross acquisition vs churn breakdown */}
+      <div className="bg-bg-secondary border border-border rounded-card p-5 mb-6">
+        <h3 className="text-text-primary text-sm font-medium mb-3">How Organic Strategy Drives Growth</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-bg-tertiary rounded-inner">
+            <p className="text-text-dim text-[10px] font-mono uppercase tracking-wider mb-1">Gross Followers Acquired</p>
+            <p className="text-success text-xl font-semibold font-mono">{formatGrowth(grossTotal)}</p>
+            <p className="text-text-dim text-[10px] mt-1">
+              {formatNumber(Math.round(grossTotal / 12))}/month from organic content
+            </p>
+          </div>
+          <div className="p-4 bg-bg-tertiary rounded-inner">
+            <p className="text-text-dim text-[10px] font-mono uppercase tracking-wider mb-1">Natural Churn</p>
+            <p className="text-danger text-xl font-semibold font-mono">-{formatNumber(churnTotal)}</p>
+            <p className="text-text-dim text-[10px] mt-1">
+              {formatNumber(Math.round(churnTotal / 12))}/month lost to attrition
+            </p>
+          </div>
+          <div className="p-4 bg-bg-tertiary rounded-inner">
+            <p className="text-text-dim text-[10px] font-mono uppercase tracking-wider mb-1">Net Growth (Organic)</p>
+            <p className="text-gold text-xl font-semibold font-mono">{formatGrowth(organicGrowth)}</p>
+            <p className="text-text-dim text-[10px] mt-1">
+              Strategy must replace {formatNumber(Math.round(churnTotal / 12))} lost/month before net growth
+            </p>
+          </div>
+        </div>
+        <p className="text-text-dim text-[10px] mt-3 leading-relaxed">
+          Organic content strategy acquires {formatNumber(grossTotal)} followers over 12 months. Natural attrition ({formatNumber(churnTotal)}) occurs regardless of content quality, representing account deletions, interest shifts, and platform migration. This is why consistent, strategic content is essential: it is the only lever that drives acquisition above the churn baseline.
+        </p>
+      </div>
 
       {/* Forecast chart */}
       <div className="bg-bg-secondary border border-border rounded-card p-6">
