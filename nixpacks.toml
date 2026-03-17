@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = ["cd studio-scope && npm install", "cd studio-scope-generic && npm install"]
+
+[phases.build]
+cmds = [
+  "cd studio-scope && npm run build",
+  "cd studio-scope-generic && npm run build",
+  "mkdir -p dist",
+  "cp -r studio-scope/dist dist/studio-scope",
+  "cp -r studio-scope-generic/dist dist/studio-scope-generic",
+  "cp public/index.html dist/index.html"
+]
+
+[start]
+cmd = "npx serve dist -s -l ${PORT:-3000}"
