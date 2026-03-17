@@ -2,5 +2,11 @@
   "name": "studio-scope-deploy",
   "private": true,
   "version": "1.0.0",
-  "description": "Multi-app deployment for Studio Scope dashboards"
+  "description": "Multi-app deployment for Studio Scope dashboards",
+  "scripts": {
+    "install:all": "cd studio-scope && npm install && cd ../studio-scope-generic && npm install",
+    "build": "cd studio-scope && npm run build && cd ../studio-scope-generic && npm run build && mkdir -p dist && cp -r studio-scope/dist dist/studio-scope && cp -r studio-scope-generic/dist dist/studio-scope-generic && cp public/index.html dist/index.html && cp public/serve.json dist/serve.json",
+    "start": "npx serve dist -l ${PORT:-3000}",
+    "postinstall": "cd studio-scope && npm install && cd ../studio-scope-generic && npm install"
+  }
 }
