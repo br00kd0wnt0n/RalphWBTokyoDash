@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/studio-scope/**", "destination": "/studio-scope/index.html" },
+    { "source": "/studio-scope-generic/**", "destination": "/studio-scope-generic/index.html" }
+  ]
+}

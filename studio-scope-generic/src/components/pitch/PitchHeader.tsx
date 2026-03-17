@@ -14,7 +14,7 @@ const PitchHeader: React.FC<PitchHeaderProps> = React.memo(({ onInfoClick, onMet
           <h1 className="font-display text-2xl font-semibold text-accent flex items-center gap-2">
             Studio Scope
             <span className="text-text-dim text-sm font-normal">by</span>
-            <img src="/ralph-logo.png" alt="Ralph" className="h-6 w-auto" />
+            <img src={`${import.meta.env.BASE_URL}ralph-logo.png`} alt="Ralph" className="h-6 w-auto" />
           </h1>
           <p className="text-text-secondary text-xs mt-0.5 tracking-wide">
             Social Growth Forecasting

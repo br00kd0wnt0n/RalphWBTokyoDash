@@ -66,7 +66,7 @@ function PitchView() {
       </main>
 
       <footer className="border-t border-border py-6 flex items-center justify-center gap-2 text-text-dim text-xs">
-        Built by <img src="/ralph-logo.png" alt="Ralph" className="h-4 w-auto inline-block" /> 2026
+        Built by <img src={`${import.meta.env.BASE_URL}ralph-logo.png`} alt="Ralph" className="h-4 w-auto inline-block" /> 2026
       </footer>
 
       {/* Methodology modal overlay */}

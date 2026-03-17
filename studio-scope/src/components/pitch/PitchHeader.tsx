@@ -10,12 +10,12 @@ const PitchHeader: React.FC<PitchHeaderProps> = React.memo(({ onInfoClick, onMet
   <header className="sticky top-0 z-50 bg-bg-secondary/95 backdrop-blur-md border-b border-border">
     <div className="max-w-dashboard mx-auto px-6 py-4 flex items-center justify-between">
       <div className="flex-shrink-0 flex items-center gap-3">
-        <img src="/WBlogo.png" alt="Warner Bros. Studio Tour Tokyo" className="h-10 w-auto" />
+        <img src={`${import.meta.env.BASE_URL}WBlogo.png`} alt="Warner Bros. Studio Tour Tokyo" className="h-10 w-auto" />
         <div>
           <h1 className="font-display text-2xl font-semibold text-gold flex items-center gap-2">
             Studio Scope
             <span className="text-text-dim text-sm font-normal">by</span>
-            <img src="/ralph-logo.png" alt="Ralph" className="h-6 w-auto" />
+            <img src={`${import.meta.env.BASE_URL}ralph-logo.png`} alt="Ralph" className="h-6 w-auto" />
           </h1>
           <p className="text-text-secondary text-xs mt-0.5 tracking-wide">
             WBSTT Social Growth Forecasting
